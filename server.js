@@ -4,7 +4,6 @@ const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
@@ -15,6 +14,12 @@ app.use(session({
   saveUninitialized: false
 }));
 
+// 🔥 FIX: Startseite sauber definieren
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
+
+// Discord Login
 app.get("/login", (req, res) => {
   const url =
     `https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}` +
@@ -25,6 +30,7 @@ app.get("/login", (req, res) => {
   res.redirect(url);
 });
 
+// Callback
 app.get("/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -39,7 +45,9 @@ app.get("/callback", async (req, res) => {
         redirect_uri: process.env.REDIRECT_URI
       }),
       {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
       }
     );
 
@@ -58,6 +66,7 @@ app.get("/callback", async (req, res) => {
   }
 });
 
+// User API
 app.get("/api/user", (req, res) => {
   res.json(req.session.user || null);
 });
